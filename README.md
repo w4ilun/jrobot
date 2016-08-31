@@ -15,7 +15,7 @@ app: ios(ios app store search jrobot) android (wandoujia or yingyongbao android 
 
 video demo:http://v.youku.com/v_show/id_XMTcwMTE4NjE5Mg==.html?from=y1.7-2
 
-![video demo]()https://youtu.be/BKA68jKV4QY)
+![video demo](https://youtu.be/BKA68jKV4QY)
 
 ![3d printed jrobot](https://github.com/junbowu/jrobot/blob/master/images/jrobot-1.jpg)
 
