@@ -7,8 +7,9 @@ Note: This is a work in progress. We are still busy building and testing it. Pro
 
 Please get start kits [taobao $120](https://item.taobao.com/item.htm?spm=a230r.1.14.28.0Gwvvy&id=531972040644&ns=1&abbucket=7#detail)
 
+3d model: http://www.thingiverse.com/thing:1745439
 qq group: 371582470
-app: jrobot
+app: ios(ios app store search jrobot) android (Õ„∂πº‘ or ”¶”√±¶ android app market search jrobot)
 
 video demo:http://v.youku.com/v_show/id_XMTcwMTE4NjE5Mg==.html?from=y1.7-2
 
@@ -21,5 +22,11 @@ video demo:http://v.youku.com/v_show/id_XMTcwMTE4NjE5Mg==.html?from=y1.7-2
 ![3d printed jrobot](https://github.com/junbowu/jrobot/blob/master/images/jrobot-4.jpg)
 
 ![3d printed jrobot](https://github.com/junbowu/jrobot/blob/master/images/jrobot-5.jpg)
+
+![3d printed jrobot](https://github.com/junbowu/jrobot/blob/master/images/android-1.png)
+
+![3d printed jrobot](https://github.com/junbowu/jrobot/blob/master/images/android-2.png)
+
+![3d printed jrobot](https://github.com/junbowu/jrobot/blob/master/images/ios-1.png)
 
 This software is released under the MIT License.
