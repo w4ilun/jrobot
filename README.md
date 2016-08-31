@@ -9,7 +9,7 @@ Please get start kits [taobao $120](https://item.taobao.com/item.htm?spm=a230r.1
 
 3d model: http://www.thingiverse.com/thing:1745439
 qq group: 371582470
-app: ios(ios app store search jrobot) android (Õ„∂πº‘ or ”¶”√±¶ android app market search jrobot)
+app: ios(ios app store search jrobot) android (wandoujia or yingyongbao android app market search jrobot)
 
 video demo:http://v.youku.com/v_show/id_XMTcwMTE4NjE5Mg==.html?from=y1.7-2
 
