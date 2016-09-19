@@ -17,8 +17,8 @@ video demo:http://v.youku.com/v_show/id_XMTcwMTE4NjE5Mg==.html?from=y1.7-2
 
 video app demo:https://youtu.be/BKA68jKV4QY
 
-
 motion editor demo: https://youtu.be/AzxJYb-AGyE
+
 ![3d printed jrobot](https://github.com/junbowu/jrobot/blob/master/images/jrobot-1.jpg)
 
 ![3d printed jrobot](https://github.com/junbowu/jrobot/blob/master/images/jrobot-2.jpg)
@@ -34,5 +34,7 @@ motion editor demo: https://youtu.be/AzxJYb-AGyE
 ![3d printed jrobot](https://github.com/junbowu/jrobot/blob/master/images/android-2.png)
 
 ![3d printed jrobot](https://github.com/junbowu/jrobot/blob/master/images/ios-1.png)
+
+![3d printed jrobot](https://github.com/junbowu/jrobot/blob/master/images/motionEditor.png)
 
 This software is released under the MIT License.
