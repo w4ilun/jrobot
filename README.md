@@ -7,15 +7,15 @@ Note: This is a work in progress. We are still busy building and testing it. Pro
 
 Please get kits [$120]
 ![BUY KIT LINK](https://c4.staticflickr.com/6/5444/30995088395_1d2db3bfe2_n.jpg)
-[BUY KIT LINK]:(https://item.taobao.com/item.htm?spm=a230r.1.14.28.0Gwvvy&id=531972040644&ns=1&abbucket=7#detail)
+(https://item.taobao.com/item.htm?spm=a230r.1.14.28.0Gwvvy&id=531972040644&ns=1&abbucket=7#detail)
 
 3d model: http://www.thingiverse.com/thing:1745439
 
 qq group: 371582470
 
-app: 
+app: jrobot
 ios(ios app store search jrobot) 
-android(Õ„∂πº‘ or ”¶”√±¶ android app market search jrobot )(http://sj.qq.com/myapp/detail.htm?apkName=jp.plen.scenography)
+android:(http://sj.qq.com/myapp/detail.htm?apkName=jp.plen.scenography)
 
 video demo:http://v.youku.com/v_show/id_XMTcwMTE4NjE5Mg==.html?from=y1.7-2
 
