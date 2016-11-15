@@ -19,7 +19,7 @@ video app demo:https://youtu.be/BKA68jKV4QY
 
 motion editor demo: https://youtu.be/AzxJYb-AGyE
 
-![3d printed jrobot](http://pan.baidu.com/s/1jI9ERDc)
+![3d printed jrobot](http://c2.staticflickr.com/6/5698/30994912865_5b4b688f03_n.jpg)
 
 ![3d printed jrobot](https://github.com/junbowu/jrobot/blob/master/images/jrobot-2.jpg)
 
