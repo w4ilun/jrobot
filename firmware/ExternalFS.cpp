@@ -58,7 +58,7 @@ void PLEN2::ExternalFs::init()
     }
     fp_motion = SPIFFS.open(MOTION_FILE, "a+");
     fp_config = SPIFFS.open(CONFIG_FILE, "a+");
-    //fp_syscfg = SPIFFS.open(SYSCFG_FILE, "r");
+    fp_syscfg = SPIFFS.open(SYSCFG_FILE, "r");
 }
 
 void PLEN2::ExternalFs::de_init()
