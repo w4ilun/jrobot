@@ -22,7 +22,7 @@
 #define PLEN2_SYSTEM_SERIAL Serial
 
 #define CONNECT_TIMEOUT_CNT 100
-
+#define FM_VERSION "V1"
 IPAddress broadcastIp(255, 255, 255, 255);
 #define BROADCAST_PORT 6000
 WiFiUDP udp;
@@ -35,7 +35,7 @@ WiFiServer tcp_server(23);
 WiFiClient serverClient;
 Ticker smartconfig_tricker;
 
-String robot_name = "JRobot-" + String(ESP.getChipId());
+String robot_name = "JRobot-" + String(ESP.getChipId()) + ":" + FM_VERSION;
 const char *wifi_psd = "12345678xyz";
 
 volatile bool update_cfg;

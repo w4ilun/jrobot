@@ -51,27 +51,27 @@ namespace
 
 		PROGMEM const int m_SETTINGS_INITIAL[] =
 		{
-			JointController::ANGLE_MIN, JointController::ANGLE_MAX,  -40, // [01] Left : Shoulder Pitch
-			JointController::ANGLE_MIN, JointController::ANGLE_MAX,  245, // [02] Left : Thigh Yaw
-			JointController::ANGLE_MIN, JointController::ANGLE_MAX,  470, // [03] Left : Shoulder Roll
+			JointController::ANGLE_MIN, JointController::ANGLE_MAX,  0, // [01] Left : Shoulder Pitch
+			JointController::ANGLE_MIN, JointController::ANGLE_MAX,  150, // [02] Left : Thigh Yaw
+			JointController::ANGLE_MIN, JointController::ANGLE_MAX,  350, // [03] Left : Shoulder Roll
 			JointController::ANGLE_MIN, JointController::ANGLE_MAX, -100, // [04] Left : Elbow Roll
-			JointController::ANGLE_MIN, JointController::ANGLE_MAX, -205, // [05] Left : Thigh Roll
-			JointController::ANGLE_MIN, JointController::ANGLE_MAX,   50, // [06] Left : Thigh Pitch
-			JointController::ANGLE_MIN, JointController::ANGLE_MAX,  445, // [07] Left : Knee Pitch
-			JointController::ANGLE_MIN, JointController::ANGLE_MAX,  245, // [08] Left : Foot Pitch
-			JointController::ANGLE_MIN, JointController::ANGLE_MAX,  -75, // [09] Left : Foot Roll
+			JointController::ANGLE_MIN, JointController::ANGLE_MAX, -100, // [05] Left : Thigh Roll
+			JointController::ANGLE_MIN, JointController::ANGLE_MAX,  -50, // [06] Left : Thigh Pitch
+			JointController::ANGLE_MIN, JointController::ANGLE_MAX,  500, // [07] Left : Knee Pitch
+			JointController::ANGLE_MIN, JointController::ANGLE_MAX,  300, // [08] Left : Foot Pitch
+			JointController::ANGLE_MIN, JointController::ANGLE_MAX,  -50, // [09] Left : Foot Roll
 			JointController::ANGLE_MIN, JointController::ANGLE_MAX, JointController::ANGLE_NEUTRAL,
 			JointController::ANGLE_MIN, JointController::ANGLE_MAX, JointController::ANGLE_NEUTRAL,
 			JointController::ANGLE_MIN, JointController::ANGLE_MAX, JointController::ANGLE_NEUTRAL,
-			JointController::ANGLE_MIN, JointController::ANGLE_MAX,   15, // [10] Right : Shoulder Pitch
-			JointController::ANGLE_MIN, JointController::ANGLE_MAX,  -70, // [11] Right : Thigh Yaw
-			JointController::ANGLE_MIN, JointController::ANGLE_MAX, -390, // [12] Right : Shoulder Roll
-			JointController::ANGLE_MIN, JointController::ANGLE_MAX,  250, // [13] Right : Elbow Roll
-			JointController::ANGLE_MIN, JointController::ANGLE_MAX,  195, // [14] Right : Thigh Roll
-			JointController::ANGLE_MIN, JointController::ANGLE_MAX, -105, // [15] Right : Thigh Pitch
-			JointController::ANGLE_MIN, JointController::ANGLE_MAX, -510, // [16] Right : Knee Pitch
-			JointController::ANGLE_MIN, JointController::ANGLE_MAX, -305, // [17] Right : Foot Pitch
-			JointController::ANGLE_MIN, JointController::ANGLE_MAX,   60, // [18] Right : Foot Roll
+			JointController::ANGLE_MIN, JointController::ANGLE_MAX,   0, // [10] Right : Shoulder Pitch
+			JointController::ANGLE_MIN, JointController::ANGLE_MAX, -150, // [11] Right : Thigh Yaw
+			JointController::ANGLE_MIN, JointController::ANGLE_MAX, -350, // [12] Right : Shoulder Roll
+			JointController::ANGLE_MIN, JointController::ANGLE_MAX,  100, // [13] Right : Elbow Roll
+			JointController::ANGLE_MIN, JointController::ANGLE_MAX,  100, // [14] Right : Thigh Roll
+			JointController::ANGLE_MIN, JointController::ANGLE_MAX,   50, // [15] Right : Thigh Pitch
+			JointController::ANGLE_MIN, JointController::ANGLE_MAX, -500, // [16] Right : Knee Pitch
+			JointController::ANGLE_MIN, JointController::ANGLE_MAX, -300, // [17] Right : Foot Pitch
+			JointController::ANGLE_MIN, JointController::ANGLE_MAX,   50, // [18] Right : Foot Roll
 			JointController::ANGLE_MIN, JointController::ANGLE_MAX, JointController::ANGLE_NEUTRAL,
 			JointController::ANGLE_MIN, JointController::ANGLE_MAX, JointController::ANGLE_NEUTRAL,
 			JointController::ANGLE_MIN, JointController::ANGLE_MAX, JointController::ANGLE_NEUTRAL
@@ -95,7 +95,7 @@ void PLEN2::JointController::Init()
 
     _enable = false;
     _eye_count = 100;
-    EyeOut.attach(Pin::LED_OUT(), 200, 15000);
+    EyeOut.attach(Pin::LED_OUT(), 200, 20000);
 
     pinMode(Pin::PCA9685_ENABLE(), OUTPUT);
     digitalWrite(Pin::PCA9685_ENABLE(), LOW);
@@ -550,17 +550,11 @@ void PLEN2::JointController::updateAngle()
 void PLEN2::JointController::updateEyes()
 {
     unsigned int led_pwm = 0;
-    //battery high
-#if CHECK_BATTERY
     //vcc*1024/11 5V
     if (analogRead(A0) > 465)
-#else
-    if (1)
-#endif
     {
         if (PLEN2::System::tcp_connected())
         {
-            //connected
             if (_enable)
             {
                 if (_eye_count > 20000)
@@ -592,9 +586,12 @@ void PLEN2::JointController::updateEyes()
     //battery low
     else
     {
-        _eye_count = 2100;
+		EyeOut.detach();
+		pinMode(Pin::LED_OUT(), OUTPUT);
+        digitalWrite(Pin::LED_OUT(), LOW);
+		flipper_second.detach();
     }
     //_eye_count / 32000 * 20
-    led_pwm = _eye_count / 1600;
+    led_pwm = _eye_count / 111;
     EyeOut.write(led_pwm);
 }

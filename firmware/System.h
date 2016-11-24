@@ -13,17 +13,23 @@
 
 class Stream;
 
-#define DEVICE_NAME ("PLEN2")
+#define CLOCK_WISE false
+#define CHECK_BATTERY true
+
+#if CLOCK_WISE
+#define DEVICE_NAME ("PLEN2-M")
+#else
+#define DEVICE_NAME ("PLEN2-N")
+
+#endif
 
 #define CODE_NAME   ("Cytisus")
 
 #define VERSION     ("1.3.1")
 
-#define CLOCK_WISE false
-#define CHECK_BATTERY true
 
 #define DEBUG       (false)
-#define DEBUG_LESS  (true)
+#define DEBUG_LESS  (false)
 #define DEBUG_HARD  (false)
 
 
