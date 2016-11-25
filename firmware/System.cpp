@@ -21,15 +21,22 @@
 
 #define PLEN2_SYSTEM_SERIAL Serial
 
-#define CONNECT_TIMEOUT_CNT 100
+#define MAX_AP_NAME_SIZE 1024
+#define MAX_AP_PSW_SIZE  1024
+#define MAX_ROBOT_NAME_SIZE 1024
+#define CONNECT_TO_CNT 100
+
+#define ENABLE_SPIFFS_DOWNLOAD false
 #define FM_VERSION "V1"
+
 IPAddress broadcastIp(255, 255, 255, 255);
 #define BROADCAST_PORT 6000
 WiFiUDP udp;
 
+const char* host = "192.168.4.1";
 ESP8266WebServer httpServer(80);
 ESP8266HTTPUpdateServer httpUpdater;
-static bool servers_started = false;
+static bool upload_server_status = false;
 
 WiFiServer tcp_server(23);
 WiFiClient serverClient;
@@ -40,10 +47,7 @@ const char *wifi_psd = "12345678xyz";
 
 volatile bool update_cfg;
 
-extern File fp_motion;
-extern File fp_config;
 extern File fp_syscfg;
-File fsUploadFile;
 
 void PLEN2::System::StartAp()
 {
@@ -66,6 +70,8 @@ PLEN2::System::System()
 {
 	PLEN2_SYSTEM_SERIAL.begin(SERIAL_BAUDRATE());
 	WiFi.mode(WIFI_STA);
+	tcp_server.begin();  
+	tcp_server.setNoDelay(true);
 }
 
 void PLEN2::System::setup_smartconfig()
@@ -109,12 +115,12 @@ void PLEN2::System::setup_smartconfig()
 	                    delay(100);
 	    				outputSerial().print(".");
 						cnt++;
-						if(cnt >= CONNECT_TIMEOUT_CNT)
+						if(cnt >= CONNECT_TO_CNT)
 						{
 							break;
 						}
 	 				}
-					if(cnt < CONNECT_TIMEOUT_CNT)
+					if(cnt < CONNECT_TO_CNT)
 					{
 						update_cfg = false;
 					}
@@ -129,128 +135,37 @@ void PLEN2::System::setup_smartconfig()
 	smartconfig_tricker.attach_ms(1024, PLEN2::System::smart_config);
 }
 
-//format bytes
-String formatBytes(size_t bytes)
+//http:///download?file=/Config.txt
+void PLEN2::System::handle_download()
 {
-    if (bytes < 1024){
-        return String(bytes)+"B";
-    } else if(bytes < (1024 * 1024)){
-        return String(bytes/1024.0)+"KB";
-    } else if(bytes < (1024 * 1024 * 1024)){
-        return String(bytes/1024.0/1024.0)+"MB";
-    } else {
-        return String(bytes/1024.0/1024.0/1024.0)+"GB";
+    if (!SPIFFS.begin()) 
+    {
+        outputSerial().println("SPIFFS failed to mount !\r\n");                    
     }
-}
-
-String getContentType(String filename)
-{
-    if(httpServer.hasArg("download")) return "application/octet-stream";
-    else if(filename.endsWith(".htm")) return "text/html";
-    else if(filename.endsWith(".html")) return "text/html";
-    else if(filename.endsWith(".css")) return "text/css";
-    else if(filename.endsWith(".js")) return "application/javascript";
-    else if(filename.endsWith(".png")) return "image/png";
-    else if(filename.endsWith(".gif")) return "image/gif";
-    else if(filename.endsWith(".jpg")) return "image/jpeg";
-    else if(filename.endsWith(".ico")) return "image/x-icon";
-    else if(filename.endsWith(".xml")) return "text/xml";
-    else if(filename.endsWith(".pdf")) return "application/x-pdf";
-    else if(filename.endsWith(".zip")) return "application/x-zip";
-    else if(filename.endsWith(".gz")) return "application/x-gzip";
-    return "text/plain";
-}
-
-bool handleFileRead(String path){
-    PLEN2_SYSTEM_SERIAL.println("handleFileRead: " + path);
-    if(path.endsWith("/")) path += "index.htm";
-    String contentType = getContentType(path);
-    String pathWithGz = path + ".gz";
-    if(SPIFFS.exists(pathWithGz) || SPIFFS.exists(path)){
-    if(SPIFFS.exists(pathWithGz))
-      path += ".gz";
-    File file = SPIFFS.open(path, "r");
-    size_t sent = httpServer.streamFile(file, contentType);
-    file.close();
-    return true;
+    else 
+    {
+        String str = "";
+        File f = SPIFFS.open(httpServer.arg(0), "r");
+        if (!f) 
+        {
+            outputSerial().println("Can't open SPIFFS file !\r\n");          
+        }
+        else 
+        {
+            char buf[1024];
+            int siz = f.size();
+            while(siz > 0) 
+            {
+                size_t len = std::min((int)(sizeof(buf) - 1), siz);
+                f.read((uint8_t *)buf, len);
+                buf[len] = 0;
+                str += buf;
+                siz -= sizeof(buf) - 1;
+            }
+            f.close();
+            httpServer.send(200, "text/plain", str);
+        }
     }
-    return false;
-}
-
-void handleFileUpload(){
-  if(httpServer.uri() != "/edit") return;
-  HTTPUpload& upload = httpServer.upload();
-  if(upload.status == UPLOAD_FILE_START){
-    String filename = upload.filename;
-    if(!filename.startsWith("/")) filename = "/"+filename;
-    PLEN2_SYSTEM_SERIAL.print("handleFileUpload Name: "); PLEN2_SYSTEM_SERIAL.println(filename);
-    fsUploadFile = SPIFFS.open(filename, "w");
-    filename = String();
-  } else if(upload.status == UPLOAD_FILE_WRITE){
-    //PLEN2_SYSTEM_SERIAL.print("handleFileUpload Data: "); PLEN2_SYSTEM_SERIAL.println(upload.currentSize);
-    if(fsUploadFile)
-      fsUploadFile.write(upload.buf, upload.currentSize);
-  } else if(upload.status == UPLOAD_FILE_END){
-    if(fsUploadFile)
-      fsUploadFile.close();
-    PLEN2_SYSTEM_SERIAL.print("handleFileUpload Size: "); PLEN2_SYSTEM_SERIAL.println(upload.totalSize);
-  }
-}
-
-void handleFileDelete(){
-  if(httpServer.args() == 0) return httpServer.send(500, "text/plain", "BAD ARGS");
-  String path = httpServer.arg(0);
-  PLEN2_SYSTEM_SERIAL.println("handleFileDelete: " + path);
-  if(path == "/")
-    return httpServer.send(500, "text/plain", "BAD PATH");
-  if(!SPIFFS.exists(path))
-    return httpServer.send(404, "text/plain", "FileNotFound");
-  SPIFFS.remove(path);
-  httpServer.send(200, "text/plain", "");
-  path = String();
-}
-
-void handleFileCreate(){
-  if(httpServer.args() == 0)
-    return httpServer.send(500, "text/plain", "BAD ARGS");
-  String path = httpServer.arg(0);
-  PLEN2_SYSTEM_SERIAL.println("handleFileCreate: " + path);
-  if(path == "/")
-    return httpServer.send(500, "text/plain", "BAD PATH");
-  if(SPIFFS.exists(path))
-    return httpServer.send(500, "text/plain", "FILE EXISTS");
-  File file = SPIFFS.open(path, "w");
-  if(file)
-    file.close();
-  else
-    return httpServer.send(500, "text/plain", "CREATE FAILED");
-  httpServer.send(200, "text/plain", "");
-  path = String();
-}
-
-void handleFileList() {
-  if(!httpServer.hasArg("dir")) {httpServer.send(500, "text/plain", "BAD ARGS"); return;}
-  
-  String path = httpServer.arg("dir");
-  PLEN2_SYSTEM_SERIAL.println("handleFileList: " + path);
-  Dir dir = SPIFFS.openDir(path);
-  path = String();
-
-  String output = "[";
-  while(dir.next()){
-    File entry = dir.openFile("r");
-    if (output != "[") output += ',';
-    bool isDir = false;
-    output += "{\"type\":\"";
-    output += (isDir)?"dir":"file";
-    output += "\",\"name\":\"";
-    output += String(entry.name()).substring(1);
-    output += "\"}";
-    entry.close();
-  }
-  
-  output += "]";
-  httpServer.send(200, "text/json", output);
 }
 
 void PLEN2::System::smart_config()
@@ -258,51 +173,23 @@ void PLEN2::System::smart_config()
 	static int cnt = 0;
 	static int timeout = 30;
 
+		
 	if(!update_cfg && ((WiFi.status() == WL_CONNECTED) || WiFi.softAPgetStationNum()))
 	{
-		if (!servers_started)
-		{
-            //list directory
-            httpServer.on("/list", HTTP_GET, handleFileList);
-            //load editor
-            httpServer.on("/edit", HTTP_GET, [](){
-            if(!handleFileRead("/edit.htm")) httpServer.send(404, "text/plain", "FileNotFound");
-            });
-            //create file
-            httpServer.on("/edit", HTTP_PUT, handleFileCreate);
-            //delete file
-            httpServer.on("/edit", HTTP_DELETE, handleFileDelete);
-            //first callback is called after the request has ended with all parsed arguments
-            //second callback handles file uploads at that location
-            httpServer.on("/edit", HTTP_POST, [](){ httpServer.send(200, "text/plain", ""); }, handleFileUpload);
-
-            //called when the url is not defined here
-            //use it to load content from SPIFFS
-            httpServer.onNotFound([](){
-            if(!handleFileRead(httpServer.uri()))
-              httpServer.send(404, "text/plain", "FileNotFound");
-            });
-
-            //get heap status, analog input value and all GPIO statuses in one json call
-            httpServer.on("/all", HTTP_GET, [](){
-            String json = "{";
-            json += "\"heap\":"+String(ESP.getFreeHeap());
-            json += ", \"analog\":"+String(analogRead(A0));
-            json += ", \"gpio\":"+String((uint32_t)(((GPI | GPO) & 0xFFFF) | ((GP16I & 0x01) << 16)));
-            json += "}";
-            httpServer.send(200, "text/json", json);
-            json = String();
-            });
-            httpUpdater.setup(&httpServer);
-            httpServer.begin();
-            servers_started = true;
-            outputSerial().println("HTTPUpdateServer ready! Open http://192.168.4.1/update in your browser\n");
-            tcp_server.begin();  
-	        tcp_server.setNoDelay(true);
-		}
-	    udp.beginPacketMulticast(broadcastIp, BROADCAST_PORT, WiFi.localIP());
+		udp.beginPacketMulticast(broadcastIp, BROADCAST_PORT, WiFi.localIP());
 		udp.write(robot_name.c_str(), robot_name.length());
 		udp.endPacket();
+
+		if (!upload_server_status)
+		{
+		#if ENABLE_SPIFFS_DOWNLOAD
+		    httpServer.on("/download", handle_download);
+		#endif
+            httpUpdater.setup(&httpServer);
+            httpServer.begin();
+            upload_server_status = true;
+            outputSerial().printf("HTTPUpdateServer ready! Open http://%s.local/update in your browser\n", host);
+		}
 	}
 
 	if(update_cfg && WiFi.smartConfigDone())
@@ -330,13 +217,12 @@ void PLEN2::System::smart_config()
 		update_cfg = false;
 	}
 }
-
-
-void PLEN2::System::handleClient()
+void PLEN2::System::handle_update()
 {
-	if (servers_started)
+	if (upload_server_status)
 	{
 	    httpServer.handleClient();
+	    delay(1);
 	}
 }
 

@@ -13,7 +13,7 @@
 
 class Stream;
 
-#define CLOCK_WISE false
+#define CLOCK_WISE true
 #define CHECK_BATTERY true
 
 #if CLOCK_WISE
@@ -108,7 +108,9 @@ public:
 	
 	static void dump();
 
-    static void handleClient();
+    static void handle_update();
+
+    static void handle_download();
 };
 
 #endif // PLEN2_SYSTEM_H

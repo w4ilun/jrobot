@@ -33,32 +33,40 @@ void PLEN2::ExternalFs::init()
         !SPIFFS.exists(SYSCFG_FILE))
     {
     	System::outputSerial().println("prepare fs......\n");
-        
-        fp = SPIFFS.open(MOTION_FILE, "w+");
-        for (i = 0, start_addr = 0; i < MOTION_FILE_SIZE / BUF_SIZE; i++, start_addr += BUF_SIZE)
+        if(!SPIFFS.exists(MOTION_FILE))
         {
-            write(start_addr, BUF_SIZE, buf, fp);       
+            fp = SPIFFS.open(MOTION_FILE, "w+");
+            for (i = 0, start_addr = 0; i < MOTION_FILE_SIZE / BUF_SIZE; i++, start_addr += BUF_SIZE)
+            {
+            write(start_addr, BUF_SIZE, buf, fp);  
+            }
+            fp.close();
         }
-        fp.close();
-        
-        fp = SPIFFS.open(CONFIG_FILE, "w+");
-        for (i = 0, start_addr = 0; i < CONFIG_FILE_SIZE / BUF_SIZE; i++, start_addr += BUF_SIZE)
+
+        if(!SPIFFS.exists(CONFIG_FILE))
         {
-            write(start_addr, BUF_SIZE, buf, fp);      
+		    fp = SPIFFS.open(CONFIG_FILE, "w+");
+		    for (i = 0, start_addr = 0; i < CONFIG_FILE_SIZE / BUF_SIZE; i++, start_addr += BUF_SIZE)
+		    {
+		        write(start_addr, BUF_SIZE, buf, fp);      
+		    }
+		    fp.close();
         }
-        fp.close();
-        
-        fp = SPIFFS.open(SYSCFG_FILE, "w+");
-        for (i = 0, start_addr = 0; i < SYSCFG_FILE_SIZE / BUF_SIZE; i++, start_addr += BUF_SIZE)
-        {
-            write(start_addr, BUF_SIZE, buf, fp);        
+
+        if(!SPIFFS.exists(SYSCFG_FILE))
+       	{
+		    fp = SPIFFS.open(SYSCFG_FILE, "w+");
+		    for (i = 0, start_addr = 0; i < SYSCFG_FILE_SIZE / BUF_SIZE; i++, start_addr += BUF_SIZE)
+		    {
+		        write(start_addr, BUF_SIZE, buf, fp);        
+		    }
+		    fp.close();
         }
-        fp.close();
         System::outputSerial().println("fs formated\n");
     }
     fp_motion = SPIFFS.open(MOTION_FILE, "a+");
     fp_config = SPIFFS.open(CONFIG_FILE, "a+");
-    fp_syscfg = SPIFFS.open(SYSCFG_FILE, "r");
+    fp_syscfg = SPIFFS.open(SYSCFG_FILE, "a+");
 }
 
 void PLEN2::ExternalFs::de_init()
