@@ -13,7 +13,7 @@
 
 class Stream;
 
-#define CLOCK_WISE true
+#define CLOCK_WISE false
 #define CHECK_BATTERY true
 
 #if CLOCK_WISE
