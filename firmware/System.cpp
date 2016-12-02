@@ -24,7 +24,7 @@
 #define MAX_AP_NAME_SIZE 1024
 #define MAX_AP_PSW_SIZE  1024
 #define MAX_ROBOT_NAME_SIZE 1024
-#define CONNECT_TO_CNT 100
+#define CONNECT_TO_CNT 5
 
 #define ENABLE_SPIFFS_DOWNLOAD false
 #define FM_VERSION "V1"
@@ -273,6 +273,27 @@ bool PLEN2::System::tcp_connected()
 char PLEN2::System::tcp_read()
 {
     return serverClient.read();
+}
+
+size_t PLEN2::System::tcp_write(const char* sbuf, size_t len)
+{
+    const size_t unit_size = 512;
+    size_t size_to_send = len;
+    const char* send_start = sbuf;
+    if (tcp_connected())
+    {
+        while (size_to_send) 
+        {
+            size_t will_send = (size_to_send < unit_size) ? size_to_send : unit_size;
+            size_t sent = serverClient.write(send_start, will_send);
+            if (sent == 0) {
+                break;
+            }
+            size_to_send -= sent;
+            send_start += sent;
+        };
+    }
+    return (size_t)(send_start - sbuf);
 }
 
 Stream& PLEN2::System::SystemSerial()

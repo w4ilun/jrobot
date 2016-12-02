@@ -9,6 +9,7 @@
 #define PLEN2_JOINT_CONTROLLER_H
 
 #define USE_DIGTAL_SERVO 0
+#define MAX_SERVOS 24
 namespace PLEN2
 {
     class JointController;
@@ -46,7 +47,7 @@ class PLEN2::JointController
 public:
     enum
     {
-        SUM = 24, //!< Summation of the servos controllable.
+        SUM = MAX_SERVOS, //!< Summation of the servos controllable.
 
         ANGLE_MIN     = -800, //!< Min angle of the servos.
         ANGLE_MAX     =  800, //!< Max angle of the servos.
@@ -328,4 +329,18 @@ public:
     static void updateEyes();
 };
 
+#define JS_REPLY 0xFF05FF01
+
+typedef struct jointControllerInfo
+{
+    unsigned char index;
+	int home;
+}jointControllerInfo_t;
+
+typedef struct dumpJointControllerReply
+{
+    int msg_id;
+    jointControllerInfo_t js[MAX_SERVOS];
+    int crc;
+}dumpJointControllerReply_t;
 #endif // PLEN2_JOINT_CONTROLLER_H

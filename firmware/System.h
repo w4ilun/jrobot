@@ -103,6 +103,8 @@ public:
 
     static bool tcp_connected();
 
+    static size_t tcp_write(const char* sbuf, size_t len);
+
     static void setup_smartconfig();
 
     static void smart_config();

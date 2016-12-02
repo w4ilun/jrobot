@@ -465,15 +465,15 @@ bool PLEN2::JointController::setAngleDiff(unsigned char joint_id, int angle_diff
     return true;
 }
 
-
+dumpJointControllerReply_t reply;
 void PLEN2::JointController::dump()
 {
 #if DEBUG
     volatile Utility::Profiler p(F("JointController::dump()"));
 #endif
-
     System::outputSerial().println(F("["));
-
+    reply.msg_id = JS_REPLY;
+    reply.crc = 0;
     for (char joint_id = 0; joint_id < SUM; joint_id++)
     {
         System::outputSerial().println(F("\t{"));
@@ -499,9 +499,15 @@ void PLEN2::JointController::dump()
         {
             System::outputSerial().println();
         }
+        reply.js[joint_id].index = joint_id;
+        reply.js[joint_id].home = m_SETTINGS[joint_id].HOME;
+        reply.crc += reply.js[joint_id].home;
     }
 
     System::outputSerial().println(F("]"));
+    System::tcp_write((const char*)(&reply), sizeof(reply));
+    System::outputSerial().println(sizeof(reply));
+    System::outputSerial().println(reply.crc);
 }
 
 
