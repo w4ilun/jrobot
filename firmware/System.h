@@ -1,8 +1,8 @@
 /*!
-	@file      System.h
-	@brief     Management class of basis about AVR MCU.
-	@author    Kazuyuki TAKASE
-	@copyright The MIT License - http://opensource.org/licenses/mit-license.php
+    @file      System.h
+    @brief     Management class of basis about AVR MCU.
+    @author    Kazuyuki TAKASE
+    @copyright The MIT License - http://opensource.org/licenses/mit-license.php
 */
 
 #pragma once
@@ -35,78 +35,81 @@ class Stream;
 
 namespace PLEN2
 {
-	class System;
+    class System;
 }
 
 /*!
-	@brief Management class of basis about AVR MCU
+    @brief Management class of basis about AVR MCU
 */
 class PLEN2::System
 {
 private:
-	
-	//! @brief Communication speed of USB serial
-	inline static const long SERIAL_BAUDRATE() { return 115200L; }
+
+    //! @brief Communication speed of USB serial
+    inline static const long SERIAL_BAUDRATE()
+    {
+        return 115200L;
+    }
 
 public:
-	/*!
-		@brief Constructor
-	*/
-	System();
+    /*!
+        @brief Constructor
+    */
+    System();
 
-	/*!
-		@brief Get USB-serial instance
+    /*!
+        @brief Get USB-serial instance
 
-		@return Reference of USB-serial instance
-	*/
-	static Stream& SystemSerial();
+        @return Reference of USB-serial instance
+    */
+    static Stream& SystemSerial();
 
-	/*!
-		@brief Get input-serial instance
+    /*!
+        @brief Get input-serial instance
 
-		@return Reference of input-serial instance
-	*/
-	static Stream& inputSerial();
+        @return Reference of input-serial instance
+    */
+    static Stream& inputSerial();
 
-	/*!
-		@brief Get output-serial instance
-		
-		@return Reference of output-serial instance
-	*/
-	static Stream& outputSerial();
+    /*!
+        @brief Get output-serial instance
 
-	/*!
-		@brief Get debug-serial instance
-		
-		@return Reference of debug-serial instance
-	*/
-	static Stream& debugSerial();
+        @return Reference of output-serial instance
+    */
+    static Stream& outputSerial();
 
-	/*!
-		@brief Dump information of the system
+    /*!
+        @brief Get debug-serial instance
 
-		Outputs result like JSON format below.
-		@code
-		{
-			"device": <string>,
-			"codename": <string>,
-			"version": <string>
-		}
-		@endcode
-	*/
-	static bool tcp_available();
+        @return Reference of debug-serial instance
+    */
+    static Stream& debugSerial();
+
+    /*!
+        @brief Dump information of the system
+
+        Outputs result like JSON format below.
+        @code
+        {
+            "device": <string>,
+            "codename": <string>,
+            "version": <string>
+        }
+        @endcode
+    */
+    static bool tcp_available();
 
     static char tcp_read();
 
     static bool tcp_connected();
 
-	static void setup_smartconfig();
+    static void setup_smartconfig();
 
-	static void smart_config();
+    static void smart_config();
 
-	static void StartAp();
-	
-	static void dump();
+    static void StartAp();
+
+    static void dump();
 
     static void handleClient();
 

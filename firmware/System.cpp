@@ -1,10 +1,10 @@
 /*
-	Copyright (c) 2015,
-	- Kazuyuki TAKASE - https://github.com/Guvalif
-	- PLEN Project Company Inc. - https://plen.jp
+    Copyright (c) 2015,
+    - Kazuyuki TAKASE - https://github.com/Guvalif
+    - PLEN Project Company Inc. - https://plen.jp
 
-	This software is released under the MIT License.
-	(See also : http://opensource.org/licenses/mit-license.php)
+    This software is released under the MIT License.
+    (See also : http://opensource.org/licenses/mit-license.php)
 */
 #include <Ticker.h>
 #include "Arduino.h"
@@ -60,7 +60,7 @@ void PLEN2::System::StartAp()
 #endif
     WiFi.mode(WIFI_AP);
     WiFi.softAP(ap_name.c_str(), wifi_psd);
- 
+
     IPAddress my_ip = WiFi.softAPIP();
     outputSerial().print("start AP! SSID:");
     outputSerial().print(ap_name);
@@ -70,100 +70,100 @@ void PLEN2::System::StartAp()
 
 PLEN2::System::System()
 {
-	PLEN2_SYSTEM_SERIAL.begin(SERIAL_BAUDRATE());
-	WiFi.mode(WIFI_STA);
-	tcp_server.begin();  
-	tcp_server.setNoDelay(true);
+    PLEN2_SYSTEM_SERIAL.begin(SERIAL_BAUDRATE());
+    WiFi.mode(WIFI_STA);
+    tcp_server.begin();
+    tcp_server.setNoDelay(true);
 }
 
 void PLEN2::System::setup_smartconfig()
 {
-	unsigned char cnt;
-	update_cfg = true;
-	if( fp_syscfg && fp_syscfg.available())
-	{
-		fp_syscfg.seek(0, SeekSet);
-		String ext_apname = fp_syscfg.readStringUntil('\n');
-		String ext_appsw;
-		if(ext_apname.length() > 1)
-		{
-			outputSerial().print("ap:");
-			outputSerial().println(ext_apname);
-			if(fp_syscfg.available())
-			{
-				ext_appsw = fp_syscfg.readStringUntil('\n');
-				outputSerial().print("psw:");
-				outputSerial().println(ext_appsw);
-				
-				char extap_name_char[ext_apname.length()];
-			    memset(extap_name_char, '\0', ext_apname.length());
-				for (int i = 0; i < ext_apname.length() - 1; i++)
-				{
-	       			extap_name_char[i] = ext_apname.charAt(i);
-					outputSerial().println(extap_name_char);
-	    		}
-				if (ext_appsw.length() > 1)
-				{
-					char extap_psw_char[ext_appsw.length()];
-					memset(extap_psw_char, '\0', ext_appsw.length());
-					for (int i = 0; i < ext_appsw.length() - 1; i++)
-					{
-			    		extap_psw_char[i] = ext_appsw.charAt(i);
-					}
-					outputSerial().println(extap_psw_char);
-					
-					WiFi.begin(extap_name_char, extap_psw_char);
-				}
-				else
-				{
-					outputSerial().println("psd is NULL!\n");
-					WiFi.begin(extap_name_char, NULL);
-				}
-				cnt = 0;
-	   		    while (WiFi.status() != WL_CONNECTED) 
-				{
+    unsigned char cnt;
+    update_cfg = true;
+    if( fp_syscfg && fp_syscfg.available())
+    {
+        fp_syscfg.seek(0, SeekSet);
+        String ext_apname = fp_syscfg.readStringUntil('\n');
+        String ext_appsw;
+        if(ext_apname.length() > 1)
+        {
+            outputSerial().print("ap:");
+            outputSerial().println(ext_apname);
+            if(fp_syscfg.available())
+            {
+                ext_appsw = fp_syscfg.readStringUntil('\n');
+                outputSerial().print("psw:");
+                outputSerial().println(ext_appsw);
+
+                char extap_name_char[ext_apname.length()];
+                memset(extap_name_char, '\0', ext_apname.length());
+                for (int i = 0; i < ext_apname.length() - 1; i++)
+                {
+                    extap_name_char[i] = ext_apname.charAt(i);
+                    outputSerial().println(extap_name_char);
+                }
+                if (ext_appsw.length() > 1)
+                {
+                    char extap_psw_char[ext_appsw.length()];
+                    memset(extap_psw_char, '\0', ext_appsw.length());
+                    for (int i = 0; i < ext_appsw.length() - 1; i++)
+                    {
+                        extap_psw_char[i] = ext_appsw.charAt(i);
+                    }
+                    outputSerial().println(extap_psw_char);
+
+                    WiFi.begin(extap_name_char, extap_psw_char);
+                }
+                else
+                {
+                    outputSerial().println("psd is NULL!\n");
+                    WiFi.begin(extap_name_char, NULL);
+                }
+                cnt = 0;
+                while (WiFi.status() != WL_CONNECTED)
+                {
                     delay(100);
-    				outputSerial().print(".");
-					cnt++;
-					if(cnt >= CONNECT_TO_CNT)
-					{
-						break;
-					}
- 				}
-				if(cnt < CONNECT_TO_CNT)
-				{
-					update_cfg = false;
-				}
-			}
-		}
-	}
-	if(update_cfg)
-	{
-		WiFi.beginSmartConfig();
-	}
-	smartconfig_tricker.attach_ms(1024, PLEN2::System::smart_config);
+                    outputSerial().print(".");
+                    cnt++;
+                    if(cnt >= CONNECT_TO_CNT)
+                    {
+                        break;
+                    }
+                }
+                if(cnt < CONNECT_TO_CNT)
+                {
+                    update_cfg = false;
+                }
+            }
+        }
+    }
+    if(update_cfg)
+    {
+        WiFi.beginSmartConfig();
+    }
+    smartconfig_tricker.attach_ms(1024, PLEN2::System::smart_config);
 }
 
 //http:///download?file=/Config.txt
 void PLEN2::System::handle_download()
 {
-    if (!SPIFFS.begin()) 
+    if (!SPIFFS.begin())
     {
-        outputSerial().println("SPIFFS failed to mount !\r\n");                    
+        outputSerial().println("SPIFFS failed to mount !\r\n");
     }
-    else 
+    else
     {
         String str = "";
         File f = SPIFFS.open(httpServer.arg(0), "r");
-        if (!f) 
+        if (!f)
         {
-            outputSerial().println("Can't open SPIFFS file !\r\n");          
+            outputSerial().println("Can't open SPIFFS file !\r\n");
         }
-        else 
+        else
         {
             char buf[1024];
             int siz = f.size();
-            while(siz > 0) 
+            while(siz > 0)
             {
                 size_t len = std::min((int)(sizeof(buf) - 1), siz);
                 f.read((uint8_t *)buf, len);
@@ -179,70 +179,69 @@ void PLEN2::System::handle_download()
 
 void PLEN2::System::smart_config()
 {
-	static int cnt = 0;
-	static int timeout = 30;
+    static int cnt = 0;
+    static int timeout = 30;
 
-		
-	if(!update_cfg && ((WiFi.status() == WL_CONNECTED) || WiFi.softAPgetStationNum()))
-	{
-		udp.beginPacketMulticast(broadcastIp, BROADCAST_PORT, WiFi.localIP());
-		udp.write(robot_name.c_str(), robot_name.length());
-		udp.endPacket();
 
-		if (!upload_server_status)
-		{
-		#if ENABLE_SPIFFS_DOWNLOAD
-		    httpServer.on("/download", handle_download);
-		#endif
-		
-			//if (!MDNS.begin(host)) 
-			//{
-			//    Serial.println("Error setting up MDNS responder!");
-			//    while(1) 
-			//	{ 
-		    //	    delay(1000);
-			//    }
-			//}
+    if(!update_cfg && ((WiFi.status() == WL_CONNECTED) || WiFi.softAPgetStationNum()))
+    {
+        udp.beginPacketMulticast(broadcastIp, BROADCAST_PORT, WiFi.localIP());
+        udp.write(robot_name.c_str(), robot_name.length());
+        udp.endPacket();
+
+        if (!upload_server_status)
+        {
+#if ENABLE_SPIFFS_DOWNLOAD
+            httpServer.on("/download", handle_download);
+#endif
+
+            //if (!MDNS.begin(host))
+            //{
+            //    Serial.println("Error setting up MDNS responder!");
+            //    while(1)
+            //  {
+            //      delay(1000);
+            //    }
+            //}
 
             httpUpdater.setup(&httpServer);
             httpServer.begin();
             upload_server_status = true;
             outputSerial().printf("HTTPUpdateServer ready! Open http://%s.local/update in your browser\n", host);
-		}
-	}
+        }
+    }
 
-	if(update_cfg && WiFi.smartConfigDone())
-	{
-		outputSerial().println("smartConfigDone!\n");
+    if(update_cfg && WiFi.smartConfigDone())
+    {
+        outputSerial().println("smartConfigDone!\n");
         outputSerial().printf("SSID:%s\r\n", WiFi.SSID().c_str());
         outputSerial().printf("PSW:%s\r\n", WiFi.psk().c_str());
 
-		if(fp_syscfg)
-		{
-			fp_syscfg.close();	
-			fp_syscfg = SPIFFS.open(SYSCFG_FILE, "w");
-			fp_syscfg.println(WiFi.SSID().c_str());
-			fp_syscfg.println(WiFi.psk().c_str());
-			fp_syscfg.close();
-			fp_syscfg = SPIFFS.open(SYSCFG_FILE, "r");
-		}
-		update_cfg = false;
-	}
-	
-	if(update_cfg && (cnt++ > timeout))
-	{
-		WiFi.stopSmartConfig();
-		StartAp();
-		update_cfg = false;
-	}
+        if(fp_syscfg)
+        {
+            fp_syscfg.close();
+            fp_syscfg = SPIFFS.open(SYSCFG_FILE, "w");
+            fp_syscfg.println(WiFi.SSID().c_str());
+            fp_syscfg.println(WiFi.psk().c_str());
+            fp_syscfg.close();
+            fp_syscfg = SPIFFS.open(SYSCFG_FILE, "r");
+        }
+        update_cfg = false;
+    }
+
+    if(update_cfg && (cnt++ > timeout))
+    {
+        WiFi.stopSmartConfig();
+        StartAp();
+        update_cfg = false;
+    }
 }
 void PLEN2::System::handleClient()
 {
-	if (upload_server_status)
-	{
-	    httpServer.handleClient();
-	    //delay(1);
-	}
+    if (upload_server_status)
+    {
+        httpServer.handleClient();
+    }
 }
 
 bool PLEN2::System::tcp_available()
@@ -250,13 +249,13 @@ bool PLEN2::System::tcp_available()
     if (tcp_server.hasClient())
     {
         serverClient = tcp_server.available();
-        if (!serverClient || !serverClient.connected())      
-		{        
-			if(serverClient)
-			{
-				serverClient.stop();
-			}
-			serverClient = tcp_server.available();
+        if (!serverClient || !serverClient.connected())
+        {
+            if(serverClient)
+            {
+                serverClient.stop();
+            }
+            serverClient = tcp_server.available();
         }
     }
     if (serverClient && serverClient.connected())
@@ -278,46 +277,46 @@ char PLEN2::System::tcp_read()
 
 Stream& PLEN2::System::SystemSerial()
 {
-	return PLEN2_SYSTEM_SERIAL;
+    return PLEN2_SYSTEM_SERIAL;
 }
 
 
 Stream& PLEN2::System::inputSerial()
 {
-	return PLEN2_SYSTEM_SERIAL;
+    return PLEN2_SYSTEM_SERIAL;
 }
 
 
 Stream& PLEN2::System::outputSerial()
 {
-	return PLEN2_SYSTEM_SERIAL;
+    return PLEN2_SYSTEM_SERIAL;
 }
 
 Stream& PLEN2::System::debugSerial()
 {
-	return PLEN2_SYSTEM_SERIAL;
+    return PLEN2_SYSTEM_SERIAL;
 }
 
 
 void PLEN2::System::dump()
 {
-	#if DEBUG
-		volatile Utility::Profiler p(F("System::dump()"));
-	#endif
+#if DEBUG
+    volatile Utility::Profiler p(F("System::dump()"));
+#endif
 
-	outputSerial().println(F("{"));
+    outputSerial().println(F("{"));
 
-	outputSerial().print(F("\t\"device\": \""));
-	outputSerial().print(DEVICE_NAME);
-	outputSerial().println(F("\","));
+    outputSerial().print(F("\t\"device\": \""));
+    outputSerial().print(DEVICE_NAME);
+    outputSerial().println(F("\","));
 
-	outputSerial().print(F("\t\"codename\": \""));
-	outputSerial().print(CODE_NAME);
-	outputSerial().println(F("\","));
+    outputSerial().print(F("\t\"codename\": \""));
+    outputSerial().print(CODE_NAME);
+    outputSerial().println(F("\","));
 
-	outputSerial().print(F("\t\"version\": \""));
-	outputSerial().print(VERSION);
-	outputSerial().println(F("\""));
+    outputSerial().print(F("\t\"version\": \""));
+    outputSerial().print(VERSION);
+    outputSerial().println(F("\""));
 
-	outputSerial().println(F("}"));
+    outputSerial().println(F("}"));
 }

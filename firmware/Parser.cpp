@@ -1,10 +1,10 @@
 ﻿/*
-	Copyright (c) 2015,
-	- Kazuyuki TAKASE - https://github.com/junbowu
-	- PLEN Project Company Inc. - https://plen.jp
+    Copyright (c) 2015,
+    - Kazuyuki TAKASE - https://github.com/junbowu
+    - PLEN Project Company Inc. - https://plen.jp
 
-	This software is released under the MIT License.
-	(See also : http://opensource.org/licenses/mit-license.php)
+    This software is released under the MIT License.
+    (See also : http://opensource.org/licenses/mit-license.php)
 */
 #include <ctype.h>
 #include <string.h>
@@ -15,211 +15,212 @@
 namespace Utility
 {
 
-/*!
-	@brief Abstract parser interface
-*/
-AbstractParser::AbstractParser()
-	: m_index(-1)
-{
-	// noop.
-}
+    /*!
+        @brief Abstract parser interface
+    */
+    AbstractParser::AbstractParser()
+        : m_index(-1)
+    {
+        // noop.
+    }
 
-AbstractParser::~AbstractParser()
-{
-	// noop.
-}
+    AbstractParser::~AbstractParser()
+    {
+        // noop.
+    }
 
-const char& AbstractParser::index()
-{
-	return m_index;
-}
-
-
-/*!
-	@brief Parser class that accepts all
-*/
-NilParser::NilParser()
-{
-	m_index = 0;
-}
-
-NilParser::~NilParser()
-{
-	// noop.
-}
-
-bool NilParser::parse(const char* input)
-{
-	return true;
-}
+    const char& AbstractParser::index()
+    {
+        return m_index;
+    }
 
 
-/*!
-	@brief Parser class that accepts only characters given
-*/
-CharGroupParser::CharGroupParser(const char* accept_chars)
-	: m_accept_chars(accept_chars)
-{
-	// noop.
-}
+    /*!
+        @brief Parser class that accepts all
+    */
+    NilParser::NilParser()
+    {
+        m_index = 0;
+    }
 
-CharGroupParser::~CharGroupParser()
-{
-	// noop.
-}
+    NilParser::~NilParser()
+    {
+        // noop.
+    }
 
-bool CharGroupParser::parse(const char* input)
-{
-	const char* it = m_accept_chars;
-
-	m_index = 0;
-	while (it[m_index] != '\0')
-	{
-		if (it[m_index] == input[0])
-		{
-			return true;
-		}
-
-		m_index++;
-	}
-
-	m_index = -1;
-	return false;
-}
+    bool NilParser::parse(const char* input)
+    {
+        return true;
+    }
 
 
-/*!
-	@brief Parser class that accepts only strings given
-*/
-StringGroupParser::StringGroupParser(const char* accept_strs[], const unsigned char size)
-	: m_accept_strs(accept_strs)
-	, m_size(size)
-{
-	// noop.
-}
+    /*!
+        @brief Parser class that accepts only characters given
+    */
+    CharGroupParser::CharGroupParser(const char* accept_chars)
+        : m_accept_chars(accept_chars)
+    {
+        // noop.
+    }
 
-StringGroupParser::~StringGroupParser()
-{
-	// noop.
-}
+    CharGroupParser::~CharGroupParser()
+    {
+        // noop.
+    }
 
-bool StringGroupParser::parse(const char* input)
-{
-	unsigned char begin  = 0;
-	unsigned char middle = m_size / 2;
-	unsigned char end    = m_size;
+    bool CharGroupParser::parse(const char* input)
+    {
+        const char* it = m_accept_chars;
 
-	while (begin <= end)
-	{
-		if (strlen(input) != strlen(m_accept_strs[middle]))
-		{
-			m_index = -1;
-			return false;
-		}
+        m_index = 0;
+        while (it[m_index] != '\0')
+        {
+            if (it[m_index] == input[0])
+            {
+                return true;
+            }
 
-		int result = strcasecmp(input, m_accept_strs[middle]);
+            m_index++;
+        }
 
-		if (result == 0)
-		{
-			m_index = middle;
-			return true;
-		}
-
-		if (result > 0)
-		{
-			begin  = middle + 1;
-			middle = (begin + end) / 2;
-
-			continue;
-		}
-
-		if (result < 0)
-		{
-			end    = middle - 1;
-			middle = (begin + end) / 2;
-
-			continue;
-		}
-	}
-
-	m_index = -1;
-	return false;
-}
+        m_index = -1;
+        return false;
+    }
 
 
-/*!
-	@brief Parser class that accepts only hex string
-*/
-HexStringParser::HexStringParser()
-{
-	// noop.
-}
+    /*!
+        @brief Parser class that accepts only strings given
+    */
+    StringGroupParser::StringGroupParser(const char* accept_strs[], const unsigned char size)
+        : m_accept_strs(accept_strs)
+        , m_size(size)
+    {
+        // noop.
+    }
 
-HexStringParser::~HexStringParser()
-{
-	// noop.
-}
+    StringGroupParser::~StringGroupParser()
+    {
+        // noop.
+    }
 
-bool HexStringParser::parse(const char* input)
-{
-	do
-	{
-		if (isxdigit(*input++) == 0)
-		{
-			m_index = -1;
-			return false;
-		}
-	} while (*input != '\0');
+    bool StringGroupParser::parse(const char* input)
+    {
+        unsigned char begin  = 0;
+        unsigned char middle = m_size / 2;
+        unsigned char end    = m_size;
 
-	m_index = 0;
-	return true;
-}
+        while (begin <= end)
+        {
+            if (strlen(input) != strlen(m_accept_strs[middle]))
+            {
+                m_index = -1;
+                return false;
+            }
+
+            int result = strcasecmp(input, m_accept_strs[middle]);
+
+            if (result == 0)
+            {
+                m_index = middle;
+                return true;
+            }
+
+            if (result > 0)
+            {
+                begin  = middle + 1;
+                middle = (begin + end) / 2;
+
+                continue;
+            }
+
+            if (result < 0)
+            {
+                end    = middle - 1;
+                middle = (begin + end) / 2;
+
+                continue;
+            }
+        }
+
+        m_index = -1;
+        return false;
+    }
 
 
-/*!
-	@brief Convert hex string to an unsigned int
-*/
-unsigned int hexbytes2uint(const char* bytes, unsigned char size)
-{
-	unsigned int result = 0;
+    /*!
+        @brief Parser class that accepts only hex string
+    */
+    HexStringParser::HexStringParser()
+    {
+        // noop.
+    }
 
-	for (char index = 0; index < size; index++)
-	{
-		unsigned int placeholder = bytes[index];
+    HexStringParser::~HexStringParser()
+    {
+        // noop.
+    }
 
-		if (placeholder >= 'a') placeholder -= ('a' - 10);
-		if (placeholder >= 'A') placeholder -= ('A' - 10);
-		if (placeholder >= '0') placeholder -= '0';
+    bool HexStringParser::parse(const char* input)
+    {
+        do
+        {
+            if (isxdigit(*input++) == 0)
+            {
+                m_index = -1;
+                return false;
+            }
+        }
+        while (*input != '\0');
 
-		unsigned int base = 0x01 << ((size - index - 1) * 4);
-
-		result += placeholder * base;
-	}
-
-	return result;
-}
+        m_index = 0;
+        return true;
+    }
 
 
-/*!
-	@brief Convert hex string to an int
-*/
-int hexbytes2int(const char* bytes, unsigned char size)
-{
-	unsigned int temp = hexbytes2uint(bytes, size);
+    /*!
+        @brief Convert hex string to an unsigned int
+    */
+    unsigned int hexbytes2uint(const char* bytes, unsigned char size)
+    {
+        unsigned int result = 0;
 
-	temp <<= (((sizeof(int) * 2) - size) * 4);
+        for (char index = 0; index < size; index++)
+        {
+            unsigned int placeholder = bytes[index];
 
-	/*!
-		@note
-		The lines expressed by (*) are not necessary because avr-gcc supports arithmetic shifts.
-	*/
-	int result = temp;
-	// bool negative = (result < 0); // (*)
+            if (placeholder >= 'a') placeholder -= ('a' - 10);
+            if (placeholder >= 'A') placeholder -= ('A' - 10);
+            if (placeholder >= '0') placeholder -= '0';
 
-	result >>= (((sizeof(int) * 2) - size) * 4);
-	// if (negative) result |= (0xFFFF << (size * 4)); // (*)
+            unsigned int base = 0x01 << ((size - index - 1) * 4);
 
-	return result;
-}
+            result += placeholder * base;
+        }
+
+        return result;
+    }
+
+
+    /*!
+        @brief Convert hex string to an int
+    */
+    int hexbytes2int(const char* bytes, unsigned char size)
+    {
+        unsigned int temp = hexbytes2uint(bytes, size);
+
+        temp <<= (((sizeof(int) * 2) - size) * 4);
+
+        /*!
+            @note
+            The lines expressed by (*) are not necessary because avr-gcc supports arithmetic shifts.
+        */
+        int result = temp;
+        // bool negative = (result < 0); // (*)
+
+        result >>= (((sizeof(int) * 2) - size) * 4);
+        // if (negative) result |= (0xFFFF << (size * 4)); // (*)
+
+        return result;
+    }
 
 } // end of namespace "Utility".
