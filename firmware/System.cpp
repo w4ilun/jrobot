@@ -33,10 +33,12 @@ IPAddress broadcastIp(255, 255, 255, 255);
 #define BROADCAST_PORT 6000
 WiFiUDP udp;
 
-const char* host = "192.168.4.1";
+const char* host = "jrobot-ota";
 ESP8266WebServer httpServer(80);
 ESP8266HTTPUpdateServer httpUpdater;
 static bool upload_server_status = false;
+#define HOSTNAME "JROBOT-OTA"
+
 
 WiFiServer tcp_server(23);
 WiFiClient serverClient;
@@ -92,38 +94,45 @@ void PLEN2::System::setup_smartconfig()
 				ext_appsw = fp_syscfg.readStringUntil('\n');
 				outputSerial().print("psw:");
 				outputSerial().println(ext_appsw);
+				
+				char extap_name_char[ext_apname.length()];
+			    memset(extap_name_char, '\0', ext_apname.length());
+				for (int i = 0; i < ext_apname.length() - 1; i++)
+				{
+	       			extap_name_char[i] = ext_apname.charAt(i);
+					outputSerial().println(extap_name_char);
+	    		}
 				if (ext_appsw.length() > 1)
 				{
-					char extap_name_char[ext_apname.length()];
 					char extap_psw_char[ext_appsw.length()];
-    				memset(extap_name_char, '\0', ext_apname.length());
-					for (int i = 0; i < ext_apname.length() - 1; i++)
-					{
-	       				extap_name_char[i] = ext_apname.charAt(i);
-	    			}
 					memset(extap_psw_char, '\0', ext_appsw.length());
 					for (int i = 0; i < ext_appsw.length() - 1; i++)
 					{
 			    		extap_psw_char[i] = ext_appsw.charAt(i);
 					}
-	  			    outputSerial().println(extap_name_char);
 					outputSerial().println(extap_psw_char);
+					
 					WiFi.begin(extap_name_char, extap_psw_char);
-					cnt = 0;
-		   		    while (WiFi.status() != WL_CONNECTED) 
+				}
+				else
+				{
+					outputSerial().println("psd is NULL!\n");
+					WiFi.begin(extap_name_char, NULL);
+				}
+				cnt = 0;
+	   		    while (WiFi.status() != WL_CONNECTED) 
+				{
+                    delay(100);
+    				outputSerial().print(".");
+					cnt++;
+					if(cnt >= CONNECT_TO_CNT)
 					{
-	                    delay(100);
-	    				outputSerial().print(".");
-						cnt++;
-						if(cnt >= CONNECT_TO_CNT)
-						{
-							break;
-						}
-	 				}
-					if(cnt < CONNECT_TO_CNT)
-					{
-						update_cfg = false;
+						break;
 					}
+ 				}
+				if(cnt < CONNECT_TO_CNT)
+				{
+					update_cfg = false;
 				}
 			}
 		}
@@ -185,6 +194,16 @@ void PLEN2::System::smart_config()
 		#if ENABLE_SPIFFS_DOWNLOAD
 		    httpServer.on("/download", handle_download);
 		#endif
+		
+			//if (!MDNS.begin(host)) 
+			//{
+			//    Serial.println("Error setting up MDNS responder!");
+			//    while(1) 
+			//	{ 
+		    //	    delay(1000);
+			//    }
+			//}
+
             httpUpdater.setup(&httpServer);
             httpServer.begin();
             upload_server_status = true;
@@ -217,12 +236,12 @@ void PLEN2::System::smart_config()
 		update_cfg = false;
 	}
 }
-void PLEN2::System::handle_update()
+void PLEN2::System::handleClient()
 {
 	if (upload_server_status)
 	{
 	    httpServer.handleClient();
-	    delay(1);
+	    //delay(1);
 	}
 }
 

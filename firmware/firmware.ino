@@ -573,6 +573,7 @@ void loop()
       app.transitState();
     }
   }
+  PLEN2::System::handleClient();
 #if ENSOUL_PLEN2
   soul.log();
   soul.action();

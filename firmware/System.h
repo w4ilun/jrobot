@@ -108,7 +108,7 @@ public:
 	
 	static void dump();
 
-    static void handle_update();
+    static void handleClient();
 
     static void handle_download();
 };
