@@ -27,7 +27,7 @@
 #define CONNECT_TO_CNT 100
 
 #define ENABLE_SPIFFS_DOWNLOAD false
-#define FM_VERSION "V1"
+#define FM_VERSION "V2"
 
 IPAddress broadcastIp(255, 255, 255, 255);
 #define BROADCAST_PORT 6000
