@@ -107,7 +107,9 @@ char PLEN2::ExternalFs::write(
     if (fp)
     {
         fp.seek(start_addr, SeekSet);
+        delay(50);
         write_size = fp.write(data, size);
+        delay(50);
         fp.flush();
         return write_size == size;
     }
@@ -122,6 +124,7 @@ unsigned char PLEN2::ExternalFs::readByte(
     if (fp)
     {
         fp.seek(start_addr, SeekSet);
+        delay(50);
         data = (unsigned char )fp.read();
         return data;
     }
@@ -136,7 +139,9 @@ char PLEN2::ExternalFs::writeByte(
     if (fp)
     {
         fp.seek(start_addr, SeekSet);
+        delay(50);
         write_size = fp.write(data);
+        delay(50);
         fp.flush();
         return write_size == 1;
     }
@@ -161,7 +166,7 @@ char PLEN2::ExternalFs::readSlot(
 #if DEBUG_LESS
         System::debugSerial().print(F(">>> bad argument! : slot = "));
         System::debugSerial().print(slot);
-        System::debugSerial().print(F(", or read_size = "));
+        System::debugSerial().print(F(", or read_size = 1"));
         System::debugSerial().print(read_size);
         System::debugSerial().print(F(", or fp = "));
         System::debugSerial().println(fp);
@@ -195,7 +200,7 @@ char PLEN2::ExternalFs::writeSlot(
 )
 {
     unsigned char read_data[100];
-#if DEBUG
+#if DEBUG_LESS
     volatile Utility::Profiler p(F("ExternalFs::writeSlot()"));
 #endif
 
@@ -229,7 +234,9 @@ char PLEN2::ExternalFs::writeSlot(
     {
         System::debugSerial().println(F(">>>writeSlot: Seek Error"));
     }
+    delay(50);
     write_size = fp.write(data, write_size);
+    delay(50);
     fp.flush();
     return 0;
 }

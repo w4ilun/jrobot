@@ -181,6 +181,9 @@ namespace
                 Utility::hexbytes2uint(m_buffer.data, 2),
                 Utility::hexbytes2int(m_buffer.data + 2, 3)
             );
+#if DEBUG_LESS
+            System::debugSerial().println(F(">>> End Set Home : "));
+#endif
         }
 
         void setJointSettings()
@@ -566,19 +569,15 @@ void loop()
     }
     if (PLEN2::System::tcp_available())
     {
-#if DEBUG_LESS
-        uint8_t c = PLEN2::System::tcp_read();
-        PLEN2::System::outputSerial().write(c);
-        app.readByte(c);
-#else
         app.readByte(PLEN2::System::tcp_read());
-#endif
         if (app.accept())
         {
             app.transitState();
         }
     }
     PLEN2::System::handleClient();
+    delay(100);
+
 #if ENSOUL_PLEN2
     soul.log();
     soul.action();

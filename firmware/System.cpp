@@ -144,39 +144,6 @@ void PLEN2::System::setup_smartconfig()
     smartconfig_tricker.attach_ms(1024, PLEN2::System::smart_config);
 }
 
-//http:///download?file=/Config.txt
-void PLEN2::System::handle_download()
-{
-    if (!SPIFFS.begin())
-    {
-        outputSerial().println("SPIFFS failed to mount !\r\n");
-    }
-    else
-    {
-        String str = "";
-        File f = SPIFFS.open(httpServer.arg(0), "r");
-        if (!f)
-        {
-            outputSerial().println("Can't open SPIFFS file !\r\n");
-        }
-        else
-        {
-            char buf[1024];
-            int siz = f.size();
-            while(siz > 0)
-            {
-                size_t len = std::min((int)(sizeof(buf) - 1), siz);
-                f.read((uint8_t *)buf, len);
-                buf[len] = 0;
-                str += buf;
-                siz -= sizeof(buf) - 1;
-            }
-            f.close();
-            httpServer.send(200, "text/plain", str);
-        }
-    }
-}
-
 void PLEN2::System::smart_config()
 {
     static int cnt = 0;
@@ -191,19 +158,6 @@ void PLEN2::System::smart_config()
 
         if (!upload_server_status)
         {
-#if ENABLE_SPIFFS_DOWNLOAD
-            httpServer.on("/download", handle_download);
-#endif
-
-            //if (!MDNS.begin(host))
-            //{
-            //    Serial.println("Error setting up MDNS responder!");
-            //    while(1)
-            //  {
-            //      delay(1000);
-            //    }
-            //}
-
             httpUpdater.setup(&httpServer);
             httpServer.begin();
             upload_server_status = true;

@@ -362,7 +362,9 @@ bool PLEN2::JointController::setHomeAngle(unsigned char joint_id, int angle)
 #endif
 
     ExternalFs::write(SETTINGS_HEAD_ADDRESS() + address_offset, sizeof(m_SETTINGS[joint_id].HOME), filler, fp_config);
-
+#if DEBUG
+    System::debugSerial().print(F(">>> end write : "));
+#endif
     return true;
 }
 
@@ -465,7 +467,7 @@ bool PLEN2::JointController::setAngleDiff(unsigned char joint_id, int angle_diff
     return true;
 }
 
-dumpJointControllerReply_t reply;
+static dumpJointControllerReply_t reply;
 void PLEN2::JointController::dump()
 {
 #if DEBUG
@@ -476,6 +478,7 @@ void PLEN2::JointController::dump()
     reply.crc = 0;
     for (char joint_id = 0; joint_id < SUM; joint_id++)
     {
+    #if DEBUG
         System::outputSerial().println(F("\t{"));
 
         System::outputSerial().print(F("\t\t\"max\": "));
@@ -499,15 +502,17 @@ void PLEN2::JointController::dump()
         {
             System::outputSerial().println();
         }
+    #endif
         reply.js[joint_id].index = joint_id;
         reply.js[joint_id].home = m_SETTINGS[joint_id].HOME;
         reply.crc += reply.js[joint_id].home;
     }
-
-    System::outputSerial().println(F("]"));
     System::tcp_write((const char*)(&reply), sizeof(reply));
+#if DEBUG
+    System::outputSerial().println(F("]"));
     System::outputSerial().println(sizeof(reply));
     System::outputSerial().println(reply.crc);
+#endif
 }
 
 
