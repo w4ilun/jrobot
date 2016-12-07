@@ -33,11 +33,10 @@ IPAddress broadcastIp(255, 255, 255, 255);
 #define BROADCAST_PORT 6000
 WiFiUDP udp;
 
-const char* host = "jrobot-ota";
+const char* host = "192.168.4.1";
 ESP8266WebServer httpServer(80);
 ESP8266HTTPUpdateServer httpUpdater;
 static bool upload_server_status = false;
-#define HOSTNAME "JROBOT-OTA"
 
 
 WiFiServer tcp_server(23);
@@ -147,21 +146,23 @@ void PLEN2::System::setup_smartconfig()
 void PLEN2::System::smart_config()
 {
     static int cnt = 0;
-    static int timeout = 30;
-
+    static int timeout = 35;
 
     if(!update_cfg && ((WiFi.status() == WL_CONNECTED) || WiFi.softAPgetStationNum()))
     {
-        udp.beginPacketMulticast(broadcastIp, BROADCAST_PORT, WiFi.localIP());
-        udp.write(robot_name.c_str(), robot_name.length());
-        udp.endPacket();
+        if (!tcp_connected())
+        {
+            udp.beginPacketMulticast(broadcastIp, BROADCAST_PORT, WiFi.localIP());
+            udp.write(robot_name.c_str(), robot_name.length());
+            udp.endPacket();
+        }
 
         if (!upload_server_status)
         {
             httpUpdater.setup(&httpServer);
             httpServer.begin();
             upload_server_status = true;
-            outputSerial().printf("HTTPUpdateServer ready! Open http://%s.local/update in your browser\n", host);
+            outputSerial().printf("HTTPUpdateServer ready! Open http://%s/update in your browser\n", host);
         }
     }
 
@@ -203,14 +204,6 @@ bool PLEN2::System::tcp_available()
     if (tcp_server.hasClient())
     {
         serverClient = tcp_server.available();
-        if (!serverClient || !serverClient.connected())
-        {
-            if(serverClient)
-            {
-                serverClient.stop();
-            }
-            serverClient = tcp_server.available();
-        }
     }
     if (serverClient && serverClient.connected())
     {

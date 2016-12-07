@@ -107,9 +107,9 @@ char PLEN2::ExternalFs::write(
     if (fp)
     {
         fp.seek(start_addr, SeekSet);
-        delay(50);
+        delay(10);
         write_size = fp.write(data, size);
-        delay(50);
+        delay(10);
         fp.flush();
         return write_size == size;
     }
@@ -139,9 +139,9 @@ char PLEN2::ExternalFs::writeByte(
     if (fp)
     {
         fp.seek(start_addr, SeekSet);
-        delay(50);
+        delay(10);
         write_size = fp.write(data);
-        delay(50);
+        delay(10);
         fp.flush();
         return write_size == 1;
     }
@@ -234,9 +234,9 @@ char PLEN2::ExternalFs::writeSlot(
     {
         System::debugSerial().println(F(">>>writeSlot: Seek Error"));
     }
-    delay(50);
+    delay(10);
     write_size = fp.write(data, write_size);
-    delay(50);
+    delay(10);
     fp.flush();
     return 0;
 }

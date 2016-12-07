@@ -9,7 +9,7 @@
 
 #include <string.h>
 
-#include <Wire.h>0.
+#include <Wire.h>
 #include <Servo.h>
 
 #include "JointController.h"
@@ -576,7 +576,7 @@ void loop()
         }
     }
     PLEN2::System::handleClient();
-    delay(100);
+    delay(10);
 
 #if ENSOUL_PLEN2
     soul.log();
