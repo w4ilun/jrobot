@@ -514,14 +514,6 @@ void setup()
     */
     delay(3000);
 #endif
-
-#if DEBUG
-    while (!Serial);
-
-    PLEN2::System::outputSerial().println(
-        F("Hello, I am PLEN2! My system is up and running ver.1.3.1, Let me walk :)")
-    );
-#endif
 }
 
 
@@ -576,8 +568,6 @@ void loop()
         }
     }
     PLEN2::System::handleClient();
-    delay(10);
-
 #if ENSOUL_PLEN2
     soul.log();
     soul.action();

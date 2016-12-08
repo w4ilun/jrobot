@@ -99,8 +99,8 @@ void PLEN2::System::setup_smartconfig()
                 for (int i = 0; i < ext_apname.length() - 1; i++)
                 {
                     extap_name_char[i] = ext_apname.charAt(i);
-                    outputSerial().println(extap_name_char);
                 }
+                outputSerial().println(extap_name_char);
                 if (ext_appsw.length() > 1)
                 {
                     char extap_psw_char[ext_appsw.length()];
