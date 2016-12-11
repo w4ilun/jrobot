@@ -24,7 +24,7 @@
 #define MAX_AP_NAME_SIZE 1024
 #define MAX_AP_PSW_SIZE  1024
 #define MAX_ROBOT_NAME_SIZE 1024
-#define CONNECT_TO_CNT 100
+#define CONNECT_TO_CNT 55
 
 #define ENABLE_SPIFFS_DOWNLOAD false
 #define FM_VERSION "V2"
@@ -43,7 +43,7 @@ WiFiServer tcp_server(23);
 WiFiClient serverClient;
 Ticker smartconfig_tricker;
 
-String robot_name = "JRobot-" + String(ESP.getChipId()) + ":" + FM_VERSION;
+String robot_name = "J-Robot-" + String(ESP.getChipId()) + ":" + FM_VERSION;
 const char *wifi_psd = "12345678xyz";
 
 volatile bool update_cfg;
