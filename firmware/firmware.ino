@@ -28,6 +28,13 @@
 #include "Soul.h"
 #endif
 
+unsigned char ssid_len = 0;
+unsigned char passwd_len = 0;
+char ssid[64] = {'\0'};
+char passwd[64] = {'\0'};
+bool ssid_updated = false;
+bool passwd_updated = false;
+
 namespace
 {
     using namespace PLEN2;
@@ -386,6 +393,81 @@ namespace
             );
         }
 
+        void setWifi()
+        {
+        #if DEBUG_LESS
+            volatile Utility::Profiler p(F("Application::setWifi()"));
+        #endif
+            if (!ssid_updated || !passwd_updated)
+            {
+            #if DEBUG
+                System::debugSerial().print(ssid_updated);
+                System::debugSerial().print(":");
+                System::debugSerial().println(passwd_updated);
+                System::debugSerial().print(m_buffer.data);
+            #endif
+                ssid_len = Utility::hexbytes2uint(m_buffer.data, 2);
+                ssid_len = ssid_len > 64 ? 64 : ssid_len;
+                passwd_len = Utility::hexbytes2uint(m_buffer.data + 2, 2);
+                passwd_len = passwd_len > 64 ? 64 : passwd_len;
+                memset(ssid, '\0', sizeof(ssid));
+                memset(passwd, '\0', sizeof(passwd));
+                if (passwd_len == 0)
+                {
+                    passwd_updated = true;
+                }
+            #if DEBUG
+                System::debugSerial().print(F(">>> ssid len : "));
+                System::debugSerial().println(Utility::hexbytes2uint(m_buffer.data, 2));
+
+                System::debugSerial().print(F(">>> passwd len : "));
+                System::debugSerial().println(Utility::hexbytes2int(m_buffer.data + 2, 2));
+            #endif
+            }
+        }
+        
+        void setWifiSsid()
+        {
+        #if DEBUG_LESS
+            volatile Utility::Profiler p(F("Application::setWifiSsid()"));
+        #endif
+            if (ssid_len)
+            {
+            #if DEBUG
+                System::debugSerial().print(F(">>> ssid: "));
+                System::debugSerial().println(m_buffer.data);
+            #endif
+                for (int i = 0; i < ssid_len; i++)
+                {
+                    ssid[i] = m_buffer.data[i];
+                }
+                System::debugSerial().println(ssid);
+                ssid_updated = true;
+                ssid_len = 0;
+            }
+        }
+
+        void setWifiPassword()
+        {
+        #if DEBUG_LESS
+            volatile Utility::Profiler p(F("Application::setWifiPassword()"));
+        #endif
+            if (passwd_len)
+            {
+            #if DEBUG
+                System::debugSerial().print(F(">>> passwd: "));
+                System::debugSerial().println(m_buffer.data);
+            #endif
+                for (int i = 0; i < passwd_len; i++)
+                {
+                    passwd[i] = m_buffer.data[i];
+                }
+                System::debugSerial().println(passwd);
+                passwd_len = 0;
+                passwd_updated = true;
+            }
+        }
+        
         void getJointSettings()
         {
 #if DEBUG_LESS
@@ -417,7 +499,6 @@ namespace
 
             System::dump();
         }
-
     public:
         virtual void afterHook()
         {
@@ -465,7 +546,10 @@ namespace
         &Application::setMax,
         &Application::setMotionFrame,
         &Application::setMotionHeader,
-        &Application::setMin
+        &Application::setMin,
+        &Application::setWifiPassword,        
+        &Application::setWifiSsid,
+        &Application::setWifi,
     };
 
     void (Application::*Application::GETTER_EVENT_HANDLER[])() =

@@ -14,6 +14,8 @@
 #include "System.h"
 #include "Profiler.h"
 
+extern unsigned char ssid_len;
+extern unsigned char passwd_len;
 namespace
 {
     namespace Shared
@@ -68,7 +70,10 @@ namespace
             "MA", // MAX
             "MF", // MOTION FRAME
             "MH", // MOTION HEADER
-            "MI"  // MIN
+            "MI", // MIN
+            "SP", // SET PASSWORD
+            "SS", // SET SSID
+            "SW"  // SET WIFI
         };
         const unsigned char SETTER_ARGS_STORE_LENGTH[] =
         {
@@ -78,7 +83,10 @@ namespace
             5,    // MAX
             104,  // MOTION FRAME
             30,   // MOTION HEADER
-            5     // MIN
+            5,    // MIN
+            0,    // SET PASSWORD
+            0,    // SET SSID
+            4     // SET WIFI
         };
 
         enum { SETTER_SYMBOL_LENGTH = sizeof(SETTER_SYMBOL) / sizeof(SETTER_SYMBOL[0]) };
@@ -252,11 +260,29 @@ void PLEN2::Protocol::transitState()
 
             m_store_length = Shared::ARGS_STORE_LENGTH[header_id][cmd_id];
 
+            if (header_id == 2 && cmd_id == 8)
+            {
+                m_store_length = ssid_len;
+            }
+
+            if (header_id == 2 && cmd_id == 7)
+            {
+                m_store_length = passwd_len;
+            }
+
             // If satisfy the following condition, transit READY state because the command has no arguments.
             if (m_store_length == 0)
             {
                 m_state = READY;
                 m_store_length = 1;
+            }
+            if (header_id == 2 && (cmd_id == 7 || cmd_id == 8))
+            {
+                m_parser[ARGUMENTS_INCOMING] = &Shared::nil_parser;
+            }
+            else
+            {
+                m_parser[ARGUMENTS_INCOMING] = &Shared::args_parser;
             }
 
             break;
@@ -264,6 +290,9 @@ void PLEN2::Protocol::transitState()
 
         case ARGUMENTS_INCOMING:
         {
+            unsigned char header_id = m_parser[HEADER_INCOMING]->index();
+            unsigned char cmd_id    = m_parser[COMMAND_INCOMING]->index();
+
             m_state = READY;
             m_parser[ARGUMENTS_INCOMING] = &Shared::args_parser;
             m_store_length = 1;
